@@ -10,29 +10,9 @@ export const fullName = writable('');
 export const emailInput = writable('');
 export const numberInput = writable('');
 export const Imageurl = writable();
-export const files = writable();
 
 
 
-// export const handleModal = (open) => {
-//   open ? open_modal.set(true) :
-//   open_modal.set(false)
-// };
-
-export const getContacts = async () => {
-
-  const { data, error } = await supabase
-    .from("contacts")
-    .select("*")
-    .eq("contact_owner", supabase.auth.user().id);
-
-  if(error){
-    contacts.set(data);
-  }else{
-    contacts.set(data);
-  }
-
-};
 
 const downloadImage = async (path,number) => {
   
@@ -40,18 +20,16 @@ const downloadImage = async (path,number) => {
   .storage
   .from('contacts')
   .getPublicUrl(path.split('/')[1])
+  console.log(data,'halooo')
 
   if(error){
     alert(error)
   }else{
-    console.log(data,'halooo')
     const {  error } = await supabase
     .from('contacts')
     .update({ img_url: data.publicURL })
     .eq('number', number)
-    getContacts()
   }
-  getContacts()
   
 };
 
@@ -61,22 +39,42 @@ export const uploadAvatar = async (files,number) => {
     if (!files || files.length === 0) {
       throw new Error("You must select an image to upload.");
     }
+
     const file = files[0];
+    
+   
+
     let { data,error } = await supabase.storage
       .from("contacts")
       .upload(file.name , file);
+
+
+      
+    console.log(data.Key,'imge data')
     if (error) {
       throw error;
-    }else{
-      downloadImage(data.Key,number)
+    }else{console.log(downloadImage(data.Key,number), "downloadImage");
 
     }
 
  
 };
 
+export const getContacts = async () => {
+ 
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("contact_owner", supabase.auth.user().id);
 
-export const addContact = async (full_name, email, number, id,imgUrl) => {
+  contacts.set(data);
+  console.log(contacts, "contacts");
+
+};
+
+
+
+export const addContact = async (email, full_name, number, id,imgUrl) => {
   console.log("addContact");
   console.log(email, full_name, number,imgUrl)
   if(id){
@@ -98,22 +96,10 @@ export const addContact = async (full_name, email, number, id,imgUrl) => {
 
   }else{
     if (email != "" || full_name != "") {
-      const number_data = await supabase
-        .from('contacts')
-        .select('number')
-        .eq('number', number)
-      const email_data = await supabase
-        .from('contacts')
-        .select('email')
-        .eq('email', email)
-      console.log(number_data, "number_data", email_data, "email_data");
-      if(number_data['data'].length > 0 || email_data['data'].length > 0){
-          // alert('number already exists')
-          closeModal()
-          return showAlert("number or email already exists", ALERT_TYPE.DANGER, 2500);
-        }
-     
-
+      fullName.set(full_name);
+      emailInput.set(email);
+      numberInput.set(number);
+      console.log(supabase.auth.user().id, 'data');
       const { data, error } = await supabase.from("contacts").insert([
   
         {
@@ -121,21 +107,16 @@ export const addContact = async (full_name, email, number, id,imgUrl) => {
           full_name: full_name,
           contact_owner: supabase.auth.user().id,
           number: number,
-          img_url:imgUrl
+          img_url:imgUrl[0].name
         },
       ]);
-  
-      uploadAvatar(imgUrl,number)
-      console.log(data)
-      closeModal()
-      showAlert("Contact added successfully", ALERT_TYPE.SUCCESS, 2500);
       getContacts()
-      
+      // uploadAvatar(imgUrl,number)
+      showAlert("Contact added successfully", ALERT_TYPE.SUCCESS, 2500);
       fullName.set('');
       emailInput.set('');
       numberInput.set('');
-     
-     
+      closeModal()
   
     } else {
       alert("Please fill the form");
@@ -144,12 +125,13 @@ export const addContact = async (full_name, email, number, id,imgUrl) => {
 
 };
 
-export const deleteContact = async (id,url) => {
+export const deleteContact = async (id) => {
   const { data, error } = await supabase
     .from("contacts")
     .delete()
     .match({ id: id });
   showAlert("Contact Deleted successfully", ALERT_TYPE.DANGER, 2500);
+
   getContacts();
 };
 

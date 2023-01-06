@@ -1,6 +1,9 @@
 <script>
   import LoginPage from "./loginPage.svelte";
+
+  export let data;
+  console.log(data);
 </script>
 
-<h1>Login</h1>
+<p>{data.product}</p>
 <LoginPage />

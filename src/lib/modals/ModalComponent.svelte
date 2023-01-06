@@ -1,18 +1,34 @@
 <script>
+  import supabase from "$lib/db";
   import { closeModal } from "svelte-modals";
-  import { addContact, fullName, emailInput, numberInput } from "../db";
+  import {
+    addContact,
+    fullName,
+    emailInput,
+    numberInput,
+    Imageurl,
+  } from "../db";
   import { createEventDispatcher } from "svelte";
+  import Avatar from "./Avatar.svelte";
   export let isOpen = false;
 
   export let title;
-  export let message;
+  // export let size;
+  // export let url;
+
+  // export let avatarUrl = null;
+  // export let uploading = false;
+  export let files = null;
+  // export let message;
   export let id = "";
   export let name = "";
   export let number = "";
   export let email = "";
+  export let url = "";
   $fullName = name;
   $emailInput = email;
   $numberInput = number;
+  $Imageurl = url;
 
   export const submitData = () => {
     dispatch("close");
@@ -22,6 +38,13 @@
     "px-6 py-2.5 bg-red-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md\n" +
     " hover:bg-red-700 hover:shadow-lg focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0\n" +
     " active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out";
+
+  export const uploadAvatar = async () => {
+    console.log(files, "files");
+
+    $Imageurl = files;
+    console.log($Imageurl, "file");
+  };
 </script>
 
 {#if isOpen}
@@ -47,9 +70,40 @@
       <form
         style="padding:5%"
         on:submit|preventDefault={() =>
-          addContact($fullName, $emailInput, $numberInput, id)}
+          addContact($fullName, $emailInput, $numberInput, id, $Imageurl)}
       >
         <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="flex justify-center">
+            <label class="button primary block" for="single" />
+            {#if url}
+              <div>
+                <img src={url} alt="Avatar" class="avatar" />
+              </div>
+              <div>
+                <span style="">
+                  <input
+                    type="file"
+                    id="single"
+                    accept="image/*"
+                    bind:files
+                    on:change={uploadAvatar}
+                  />
+                </span>
+              </div>
+            {/if}
+
+            {#if !url}
+              <span style="">
+                <input
+                  type="file"
+                  id="single"
+                  accept="image/*"
+                  bind:files
+                  on:change={uploadAvatar}
+                />
+              </span>
+            {/if}
+          </div>
           <div>
             <label
               for="first_name"
