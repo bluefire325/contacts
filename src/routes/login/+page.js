@@ -1,6 +1,6 @@
 export const load = async () => {
     return{
-        product:'sampot nimo'
+        product:''
     }
 }
 
