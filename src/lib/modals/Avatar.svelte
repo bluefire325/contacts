@@ -41,7 +41,7 @@
       const file = files[0];
       const fileExt = file.name.split(".").pop();
       const filePath = `${Math.random()}.${fileExt}`;
-
+      // sss
       let { error } = await supabase.storage
         .from("contacts")
         .upload(filePath, file);
